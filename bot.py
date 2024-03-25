@@ -29,9 +29,7 @@ def start(message):
     user_name = message.from_user.first_name
     logging.info("Отправка приветственного сообщения")
     bot.send_message(message.chat.id,
-                     text=f"Привет, {user_name}! Я бот-помощник для решения пунктуации в предожениях!\n"
-                          f"Ты можешь прислать мне предложение, а я напишу его правильно.\n"
-                          "Иногда ответы получаются слишком длинными - в этом случае ты можешь попросить продолжить.",
+                     text=f"Привет, {user_name}! Я бот-мультипомощник и могу помогать по математике, русскому, программированию",
                      reply_markup=create_keyboard(["/solve_task", '/help']))
 
 @bot.message_handler(commands=['help'])
@@ -66,22 +64,28 @@ def get_promt(message):
         bot.register_next_step_handler(message, get_promt)
         return
 
-    user_request = message.text # Получаем текст сообщения от пользователя
+    user_request = message.text
 
-    if gpt.count_tokens(user_request) > MAX_TOKENS: #проверка количества токенов
+    if gpt.count_tokens(user_request) > MAX_TOKENS:
         bot.send_message(user_id, "Запрос превышает количество символов\nИсправь запрос")
+        bot.register_next_step_handler(message, get_promt)
+        return
+
+    if (user_id not in users_history or users_history[user_id] == {}) and user_request == "Продолжить решение":
+        bot.send_message(user_id, "Чтобы продолжить решение, сначала нужно отправить текст задачи")
+        bot.send_message(user_id, "Напиши условие новой задачи:")
         bot.register_next_step_handler(message, get_promt)
         return
 
     if user_id not in users_history or users_history[user_id] == {}:
         # Сохраняем промт пользователя и начало ответа GPT в словарик users_history
         users_history[user_id] = {
-            'system_content': "Ты - дружелюбный помощник для решения задач по пунктуации в предложениях. Давай правильный ответ с решением на русском языке",
+            'system_content': "Ты - дружелюбный помощник для решения задач по математике. Давай подробный ответ с решением на русском языке",
             'user_content': user_request,
             'assistant_content': "Решим задачу по шагам: "
         }
 
-    #формирование промта и отправка запроса к нейросети
+    # GPT: формирование промта и отправка запроса к нейросети
     promt = gpt.make_promt(users_history[user_id])
     resp = gpt.send_request(promt)
     answer = gpt.process_resp(resp)
@@ -110,15 +114,14 @@ def end_task(message):
         bot.register_next_step_handler(message, get_promt)
         return
  # приветливость
-
 bot.message_handler(content_types=['text'])
 def ansvers (message):
     if "прив" in message.text.lower():
-        bot.reply_to(message, info.hello)
+        bot.reply_to(message,  text=f"приветики!")
     elif "пока" in message.text.lower():
-        bot.reply_to(message, info.bye)
+        bot.reply_to(message,  text=f"пока-пока")
     elif "кто" and "ты" in message.text.lower():
-        bot.reply_to(message, info.who)
+        bot.reply_to(message,  text=f"ты можешь нажать на /about и узнать кто я!")
     elif "как" and "дела" in message.text.lower():
         bot.reply_to(message, text=f"Спасибо, что спросил_а! Дела отлично!")
 
