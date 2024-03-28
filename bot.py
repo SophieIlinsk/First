@@ -1,7 +1,7 @@
 from telebot import TeleBot
 from telebot.types import ReplyKeyboardMarkup
-from config import TOKEN, MAX_TOKENS
-from gpt import GPT
+from confing import *
+from gpt import *
 import logging
 
 bot = TeleBot(TOKEN)
