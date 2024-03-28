@@ -1,6 +1,6 @@
 import requests
 from transformers import AutoTokenizer
-from config import *
+from confing import *
 
 
 class GPT:
