@@ -2,29 +2,23 @@ import requests
 from transformers import AutoTokenizer
 from config import *
 
-def response_gpt(promt):
-    url = 'https://api.gpt-open.com/v1/chat/engines/davinci/completions',
-    headers={"Content-Type": "application/json",
-             "Authorization": f"Bearer {gpt_api_key}"},
-    json = {"promt": promt,
-            "max_tokens": 50}
-    response = requests.post(url, json=json, headers = headers)
-    return response.json()["choices"][0]["text"]
 
 class GPT:
-    def __init__(self, system_content="Ты - дружелюбный помощник для решения задач по пунктуации в предложениях. Давай правильный ответ с решением на русском языке"):
+    def __init__(self, system_content="Ты - дружелюбный помощник для решения задач по математике. "
+                                      "Давай подробный ответ с решением на русском языке"):
         self.system_content = system_content
         self.URL = GPT_LOCAL_URL
         self.HEADERS = HEADERS
         self.MAX_TOKENS = MAX_TOKENS
-        self.assistant_content = "Решение задачи: "
+        self.assistant_content = "Решим задачу по шагам: "
 
     # Подсчитываем количество токенов в промте
     @staticmethod
     def count_tokens(prompt):
-        tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2")  # название модели
+        tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.1")  # название модели
         return len(tokenizer.encode(prompt))
-    # Проверка ошибки
+
+    # Проверка ответа на возможные ошибки и его обработка
     def process_resp(self, response) -> [bool, str]:
         # Проверка статус кода
         if response.status_code < 200 or response.status_code >= 300:
@@ -54,7 +48,7 @@ class GPT:
         json = {
             "messages": [
                 {"role": "system", "content": user_history['system_content']},
-                {"role": "user", "content": user_history['user_request']},
+                {"role": "user", "content": user_history['user_content']},
                 {"role": "assistant", "content": user_history['assistant_content']}
             ],
             "temperature": 1.2,
