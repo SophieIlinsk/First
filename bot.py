@@ -1,6 +1,5 @@
 from telebot import TeleBot
 from telebot.types import ReplyKeyboardMarkup
-from confing import *
 from gpt import *
 import logging
 
@@ -29,7 +28,7 @@ def start(message):
     user_name = message.from_user.first_name
     logging.info("Отправка приветственного сообщения")
     bot.send_message(message.chat.id,
-                     text=f"Привет, {user_name}! Я бот-мультипомощник и могу помогать по математике, русскому, программированию",
+                     text=f"Привет, {user_name}! Я бот-помощник и могу помочь с орфографией в предложениях",
                      reply_markup=create_keyboard(["/solve_task", '/help']))
 
 @bot.message_handler(commands=['help'])
@@ -90,8 +89,7 @@ def get_promt(message):
     resp = gpt.send_request(promt)
     answer = gpt.process_resp(resp)
 
-    users_history[user_id]['assistant_content'] += answer
-
+    users_history[user_id]['assistant_content'] += answer[1]
     # кнопочки "продолжить решение" и "завершить решение"
     bot.send_message(
         user_id,
@@ -108,6 +106,7 @@ def end_task(message):
     bot.send_message(user_id, "Текущие решение завершено")
     users_history[user_id] = {}
     solve_task(message)
+    user_request = message.text
     if (user_id not in users_history or users_history[user_id] == {}) and user_request == "Продолжить решение":
         bot.send_message(user_id, "Чтобы продолжить решение, сначала нужно отправить текст задачи")
         bot.send_message(user_id, "Напиши условие новой задачи:")
@@ -138,11 +137,5 @@ def about_command(message):
 def send_logs(message):
     with open("log_file.txt", "rb") as f:
         bot.send_document(message.chat.id, f)
-
-@bot.message_handler(func=lambda message: True)
-def handle(message):
-    prompt = message.txt
-    response =  response_gpt(prompt)
-    bot.send_message(message.chat.id, response)
 
 bot.polling()
