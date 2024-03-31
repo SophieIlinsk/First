@@ -4,7 +4,7 @@ from confing import *
 
 
 class GPT:
-    def __init__(self, system_content="Ты - дружелюбный помощник для решения задач по математике. "
+    def __init__(self, system_content="Ты - дружелюбный помощник для решения задач по орфографией. "
                                       "Давай подробный ответ с решением на русском языке"):
         self.system_content = system_content
         self.URL = GPT_LOCAL_URL
@@ -15,7 +15,7 @@ class GPT:
     # Подсчитываем количество токенов в промте
     @staticmethod
     def count_tokens(prompt):
-        tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.1")  # название модели
+        tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2")  # название модели
         return len(tokenizer.encode(prompt))
 
     # Проверка ответа на возможные ошибки и его обработка
